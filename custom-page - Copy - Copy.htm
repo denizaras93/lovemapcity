@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<style>
+    /* Paper styling */
+    #paper {
+        width: 210mm; /* A4 paper width in millimeters */
+        height: 297mm; /* A4 paper height in millimeters */
+        margin: 0 auto;
+        padding: 20mm; /* Padding for content inside the paper */
+        box-sizing: border-box; /* Include padding and borders in total width/height */
+        background-color: white; /* Paper background color */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Paper shadow for depth */
+        font-family: Arial, sans-serif; /* Font for text on paper */
+        font-size: 14px; /* Default font size for text on paper */
+        color: black; /* Text color on paper */
+        display: flex; /* Use flex layout for positioning */
+        flex-direction: column; /* Arrange content vertically */
+        justify-content: flex-start; /* Align content to the top of the paper */
+        align-items: center; /* Center align content horizontally */
+    }
+
+    /* Circular map container */
+    #circular-map-container {
+        width: 150mm; /* Adjust the size as needed */
+        height: 150mm; /* Should be equal to width for a perfect circle */
+        border-radius: 50%; /* Creates a circular shape */
+        overflow: hidden; /* Clips content outside the circle */
+        background-color: white; /* Set the background color of the circular area */
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Add a shadow for depth */
+        margin: auto; /* Center the circle horizontally */
+        margin-top: 20px; /* Adjust the top margin to position it higher */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Map inside the circular container */
+    .map-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Ensure the image covers the circular container */
+    }
+
+    /* Returned message styling */
+    #returnedMessage {
+        text-align: center;
+        position: relative;
+        top: -300px; /* Move the message further up */
+        font-family: "watermelon", Arial, sans-serif; /* Apply the custom font "watermelon" */
+        font-size: 14px; /* Default font size for the message */
+    }
+
+    /* Form styling */
+    #textForm {
+        text-align: center; /* Center align the form */
+    }
+
+    /* Text input styling */
+    input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px; /* Default font size for input fields */
+    }
+
+    /* Textarea styling */
+    textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        resize: vertical; /* Allow vertical resizing of the textarea */
+        font-size: 14px; /* Default font size for textarea */
+    }
+
+    /* Font select styling */
+    select[name="font"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: Arial, sans-serif; /* Apply the font style for the dropdown list */
+        font-size: 14px; /* Default font size for the dropdown list */
+    }
+
+    /* Font size select styling */
+    select[name="fontSizeSender"], select[name="fontSizeReceiver"], select[name="fontSizeCustomText"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: Arial, sans-serif; /* Apply the font style for the dropdown list */
+        font-size: 14px; /* Default font size for the dropdown list */
+    }
+
+    /* Submit button styling */
+    input[type="submit"] {
+        background-color: #ff6f61;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+        background-color: #ff534d;
+    }
+
+    /* Define the @font-face rule to load the custom font */
+    @font-face {
+        font-family: "watermelon";
+        src: url("watermelon.woff") format("woff");
+    }
+</style>
+
+<!-- Include Leaflet CSS and JavaScript -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+</head>
+<body>
+    <!-- Paper container -->
+    <div id="paper">
+        <!-- Circular map container -->
+        <div id="circular-map-container">
+            <!-- Leaflet Map goes here -->
+            <div id="map" class="map-image"></div>
+        </div>
+
+        <!-- Returned message will be displayed here -->
+        <div id="returnedMessage"></div>
+    </div>
+
+    <!-- Form for entering names, custom text, font selection, and font size (outside the paper) -->
+    <form id="textForm">
+        <label for="senderName">Your Name:</label><br>
+        <input type="text" id="senderName" name="senderName"><br>
+
+        <label for="receiverName">Recipient's Name:</label><br>
+        <input type="text" id="receiverName" name="receiverName"><br>
+
+        <label for="customTextInput">Custom Text:</label><br>
+        <textarea id="customTextInput" name="customTextInput"></textarea><br>
+
+        <label for="font">Font:</label><br>
+        <select id="font" name="font">
+            <option value="Arial, sans-serif">Arial</option>
+            <option value="'watermelon', Arial, sans-serif">Watermelon</option>
+        </select><br>
+
+        <label for "fontSizeSender">Font Size (Your Name):</label><br>
+        <select id="fontSizeSender" name="fontSizeSender">
+            <option value="12px">12px</option>
+            <option value="14px" selected>14px</option>
+            <option value="16px">16px</option>
+            <option value="18px">18px</option>
+        </select><br>
+
+        <label for="fontSizeReceiver">Font Size (Recipient's Name):</label><br>
+        <select id="fontSizeReceiver" name="fontSizeReceiver">
+            <option value="12px">12px</option>
+            <option value="14px" selected>14px</option>
+            <option value="16px">16px</option>
+            <option value="18px">18px</option>
+        </select><br>
+
+        <label for="fontSizeCustomText">Font Size (Custom Text):</label><br>
+        <select id="fontSizeCustomText" name="fontSizeCustomText">
+            <option value="12px">12px</option>
+            <option value="14px" selected>14px</option>
+            <option value="16px">16px</option>
+            <option value="18px">18px</option>
+        </select><br>
+
+        <input type="submit" value="Create Love Map">
+    </form>
+
+    <!-- JavaScript code for creating the love map -->
+    <script>
+        document.getElementById('textForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the form from submitting
+
+            // Get the values entered by the user
+            const senderName = document.getElementById('senderName').value;
+            const receiverName = document.getElementById('receiverName').value;
+            const customText = document.getElementById('customTextInput').value;
+            const selectedFont = document.getElementById('font').value;
+            const selectedFontSizeSender = document.getElementById('fontSizeSender').value;
+            const selectedFontSizeReceiver = document.getElementById('fontSizeReceiver').value;
+            const selectedFontSizeCustomText = document.getElementById('fontSizeCustomText').value;
+
+            // Create the love note message using the entered values
+            const loveNoteMessage = `
+                <div style="text-align: center;">
+                    <span style="font-family: ${selectedFont}; font-size: ${selectedFontSizeSender};">${senderName} & ${receiverName}</span><br><br>
+                    <span style="font-family: ${selectedFont}; font-size: ${selectedFontSizeCustomText};">${customText}</span>
+                </div>
+            `;
+
+            // Update the returned message element with the generated love note
+            document.getElementById('returnedMessage').innerHTML = loveNoteMessage;
+        });
+    </script>
+
+    <!-- JavaScript code for initializing the Leaflet Map with a marker and style -->
+    <script>
+        var map = L.map('map').setView([51.505, -0.09], 13);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        // Add a marker to the map
+        var marker = L.marker([51.5, -0.09]).addTo(map);
+
+        // Apply the specified style to the map
+        var style = [
+            {
+                "elementType": "labels",
+                "stylers": [
+                    { "visibility": "off" }
+                ]
+            },
+            {
+                "elementType": "geometry",
+                "stylers": [
+                    { "visibility": "off" }
+                ]
+            },
+            {
+                "featureType": "road",
+                "elementType": "geometry",
+                "stylers": [
+                    { "visibility": "on" },
+                    { "color": "#000000" }
+                ]
+            },
+            {
+                "featureType": "landscape",
+                "stylers": [
+                    { "color": "#ffffff" },
+                    { "visibility": "on" }
+                ]
+            }
+        ];
+
+        // Apply the style to the map
+        map.setOptions({ styles: style });
+    </script>
+</body>
+</html>
